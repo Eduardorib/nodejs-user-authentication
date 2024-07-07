@@ -1,5 +1,4 @@
 require("dotenv").config({ path: `${__dirname}/../.env` });
-console.log(process.env);
 
 const { Sequelize, DataTypes } = require("sequelize");
 
@@ -10,11 +9,13 @@ const postgres = {
   database: process.env.PGDATABASE,
 };
 
+// Instantiating Sequelize with database URI
 const sequelize = new Sequelize(
   `postgres://${postgres.user}:${postgres.password}@localhost:${postgres.port}/${postgres.database}`,
   { dialect: "postgres" }
 );
 
+// Authenticate on to database
 sequelize
   .authenticate()
   .then(() => {

@@ -23,7 +23,7 @@ const saveUser = async (req, res, next) => {
     });
 
     if (emailcheck) {
-      return res.json(409).send("Authentication failed");
+      return res.status(409).json({ msg: "email already registered" });
     }
 
     next();
