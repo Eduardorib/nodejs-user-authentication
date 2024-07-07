@@ -1,5 +1,9 @@
 # Node.js - User Authentication
-A simple node.js user authentication, using postgres to persist data and JWT for web tokens.
+
+A simple node.js user authentication, using: 
+- postgres with sequelize ORM to persist data
+- JWT for web tokens
+- bcrypt for password hashing
 
 ## To do:
 - Password Hashing (bcrypt) ✅
