@@ -15,15 +15,15 @@ npm install
 
 Then, add an `/.env` file with correct DB credentials and secret key of your choice.
 
-Example
-
+Example:
+```
 PGUSER=postgres
 PGPASSWORD=password
 PGPORT=5432
 PGDATABASE=UserAuth
 
 secretKey = your_key
-
+```
 ### Run
 ```
 npm start
