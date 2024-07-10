@@ -8,6 +8,9 @@ const asyncWrapper = require("../middleware/async");
 require("dotenv").config({ path: `${__dirname}/../.env` });
 
 const User = db.users;
+const Role = db.role;
+
+const Op = db.Sequelize.Op;
 
 const signup = asyncWrapper(async (req, res, next) => {
   const { userName, email, password } = req.body;
@@ -20,6 +23,20 @@ const signup = asyncWrapper(async (req, res, next) => {
   const user = await User.create(data);
 
   if (user) {
+    if (req.body.roles) {
+      const roles = await Role.findAll({
+        where: {
+          name: {
+            [Op.or]: req.body.roles,
+          },
+        },
+      });
+
+      await user.setRoles(roles); // Set roles provided in body
+    } else {
+      await user.setRoles([1]); // If don't provided, set role to "user"
+    }
+
     let token = jwt.sign({ user }, process.env.secretKey, {
       expiresIn: "1h",
     });
