@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const commonRoutes = require("./routes/commonRoutes");
 
 const db = require("./models");
+const Role = db.role;
 
 const port = process.env.PORT || 3000;
 
@@ -36,8 +37,23 @@ app.use(notFound);
 
 const start = async () => {
   try {
-    db.sequelize.sync({ force: false }).then(() => {
+    db.sequelize.sync({ force: true }).then(() => {
       console.log("db has been re sync");
+
+      Role.create({
+        id: 1,
+        name: "user",
+      });
+
+      Role.create({
+        id: 2,
+        name: "moderator",
+      });
+
+      Role.create({
+        id: 3,
+        name: "admin",
+      });
     });
 
     app.listen(port, console.log(`Server is listening on port ${port}...`));
