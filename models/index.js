@@ -29,10 +29,10 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.users = require("./userModel")(sequelize, DataTypes);
+db.user = require("./userModel")(sequelize, DataTypes);
 db.role = require("./roleModel")(sequelize, DataTypes);
 
-db.role.belongsToMany(db.users, {
+db.role.belongsToMany(db.user, {
   through: "user_roles",
 });
 db.user.belongsToMany(db.role, {
