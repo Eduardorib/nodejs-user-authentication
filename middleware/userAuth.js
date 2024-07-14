@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../models");
 
 const ROLES = db.ROLES;
-const User = db.users;
+const User = db.user;
 
 // Check if username or email already exist in the database
 const saveUser = async (req, res, next) => {
