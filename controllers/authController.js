@@ -7,7 +7,7 @@ const asyncWrapper = require("../middleware/async");
 
 require("dotenv").config({ path: `${__dirname}/../.env` });
 
-const User = db.users;
+const User = db.user;
 const Role = db.role;
 
 const Op = db.Sequelize.Op;
@@ -34,7 +34,7 @@ const signup = asyncWrapper(async (req, res, next) => {
 
       await user.setRoles(roles); // Set roles provided in body
     } else {
-      await user.setRoles([1]); // If don't provided, set role to "user"
+      await user.setRoles([1]); // If don't provided, set role "user"
     }
 
     let token = jwt.sign({ user }, process.env.secretKey, {
@@ -43,7 +43,15 @@ const signup = asyncWrapper(async (req, res, next) => {
 
     res.cookie("token", token, { httpOnly: true });
 
-    return res.status(201).json({ msg: "user created successfully", user });
+    return res.status(201).json({
+      msg: "user created successfully",
+      user: {
+        id: user.id,
+        username: user.userName,
+        email: user.email,
+        accessToken: token,
+      },
+    });
   } else {
     return next(createCustomError("details are not correct", 409));
   }
@@ -66,9 +74,26 @@ const login = asyncWrapper(async (req, res, next) => {
         expiresIn: "1h",
       });
 
+      const userRoles = await user.getRoles();
+
+      let rolesArr = [];
+
+      for (let i = 0; i < userRoles.length; i++) {
+        rolesArr.push("ROLE_" + userRoles[i].name.toUpperCase());
+      }
+
       res.cookie("token", token, { httpOnly: true });
 
-      return res.status(201).json({ msg: "logged in successfully", user });
+      return res.status(201).json({
+        msg: "logged in successfully",
+        user: {
+          id: user.id,
+          username: user.userName,
+          email: user.email,
+          roles: rolesArr,
+          accessToken: token,
+        },
+      });
     } else {
       return next(createCustomError("invalid password", 404));
     }
