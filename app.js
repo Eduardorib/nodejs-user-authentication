@@ -3,7 +3,9 @@ const express = require("express");
 const sequelize = require("sequelize");
 const cookieParser = require("cookie-parser");
 
-const verifyToken = require("./middleware/authJWT");
+const authJWT = require("./middleware/authJWT");
+const { verifyToken } = authJWT;
+
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -37,23 +39,8 @@ app.use(notFound);
 
 const start = async () => {
   try {
-    db.sequelize.sync({ force: true }).then(() => {
+    db.sequelize.sync({ force: false }).then(() => {
       console.log("db has been re sync");
-
-      Role.create({
-        id: 1,
-        name: "user",
-      });
-
-      Role.create({
-        id: 2,
-        name: "moderator",
-      });
-
-      Role.create({
-        id: 3,
-        name: "admin",
-      });
     });
 
     app.listen(port, console.log(`Server is listening on port ${port}...`));
@@ -61,5 +48,22 @@ const start = async () => {
     console.log(error);
   }
 };
+
+function initial() {
+  Role.create({
+    id: 1,
+    name: "user",
+  });
+
+  Role.create({
+    id: 2,
+    name: "moderator",
+  });
+
+  Role.create({
+    id: 3,
+    name: "admin",
+  });
+}
 
 start();
