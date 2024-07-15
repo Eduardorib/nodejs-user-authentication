@@ -37,7 +37,7 @@ const signup = asyncWrapper(async (req, res, next) => {
       await user.setRoles([1]); // If don't provided, set role "user"
     }
 
-    let token = jwt.sign({ user }, process.env.secretKey, {
+    let token = jwt.sign({ id: user.id }, process.env.secretKey, {
       expiresIn: "1h",
     });
 
@@ -70,7 +70,7 @@ const login = asyncWrapper(async (req, res, next) => {
     const isSame = await bcrypt.compare(password, user.password);
 
     if (isSame) {
-      let token = jwt.sign({ user }, process.env.secretKey, {
+      let token = jwt.sign({ id: user.id }, process.env.secretKey, {
         expiresIn: "1h",
       });
 
