@@ -97,10 +97,10 @@ const login = asyncWrapper(async (req, res, next) => {
         },
       });
     } else {
-      return next(createCustomError("invalid password", 404));
+      return next(createCustomError("Invalid password", 404));
     }
   } else {
-    return next(createCustomError("email not registered", 404));
+    return next(createCustomError("Email not found", 404));
   }
 });
 
@@ -134,7 +134,7 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
-        res.status(500).send("Error sending email");
+        return next(createCustomError("Error sending email", 500));
       } else {
         console.log(`Email sent: ${info.response}`);
         res
@@ -145,7 +145,7 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
       }
     });
   } else {
-    res.status(404).send("Email not found");
+    return next(createCustomError("Email not found", 404));
   }
 });
 
