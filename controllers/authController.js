@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const db = require("../models");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 const { createCustomError } = require("../errors/customError");
 const asyncWrapper = require("../middleware/async");
@@ -102,7 +104,53 @@ const login = asyncWrapper(async (req, res, next) => {
   }
 });
 
+const forgotPassword = asyncWrapper(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({
+    where: {
+      email: email,
+    },
+  });
+
+  if (user) {
+    const token = crypto.randomBytes(20).toString("hex");
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAILRECOVERY,
+        pass: process.env.EMAILRECOVERYPASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAILRECOVERY,
+      to: email,
+      subject: "Password Reset",
+      text: `Click the following link to reset your password: http://localhost:3000/reset-password/${token}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log(`Email sent: ${info.response}`);
+        res
+          .status(200)
+          .send(
+            "Check your email for instructions on resetting your password."
+          );
+      }
+    });
+  } else {
+    res.status(404).send("Email not found");
+  }
+});
+
 module.exports = {
   signup,
   login,
+  forgotPassword,
 };
