@@ -11,6 +11,7 @@ require("dotenv").config({ path: `${__dirname}/../.env` });
 
 const User = db.user;
 const Role = db.role;
+const Token = db.token;
 
 const Op = db.Sequelize.Op;
 
@@ -55,7 +56,7 @@ const signup = asyncWrapper(async (req, res, next) => {
       },
     });
   } else {
-    return next(createCustomError("details are not correct", 409));
+    return next(createCustomError("details are not correct", 400));
   }
 });
 
@@ -114,7 +115,17 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
   });
 
   if (user) {
-    const token = crypto.randomBytes(20).toString("hex");
+    const token = jwt.sign({ id: user.id }, process.env.resetKey, {
+      expiresIn: "30m",
+    });
+
+    const output = `
+                <h2>This is your token for reseting your password:</h2>
+                <p>${token}</p>
+                <p><b>NOTE: </b> Token expires in 30 minutes.</p>
+                `;
+
+    await user.update({ resetToken: token });
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -128,7 +139,7 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
       from: process.env.EMAILRECOVERY,
       to: email,
       subject: "Password Reset",
-      text: `Click the following link to reset your password: http://localhost:3000/reset-password/${token}`,
+      html: output,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -149,8 +160,53 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
   }
 });
 
+const resetPassword = asyncWrapper(async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  if (!password) {
+    return next(createCustomError("Please provide new password", 404));
+  }
+
+  if (token) {
+    jwt.verify(token, process.env.resetKey, async (error, decodedToken) => {
+      if (error) {
+        return next(
+          createCustomError("Incorrect or expired link, please try again", 404)
+        );
+      } else {
+        const { id } = decodedToken;
+        const user = await User.findOne({
+          where: {
+            id: id,
+          },
+        });
+
+        if (user) {
+          await user.update({
+            password: await bcrypt.hash(password, 10),
+            resetToken: "",
+          });
+
+          res.status(200).send("Password updated successfully");
+        } else {
+          return next(
+            createCustomError(
+              "User with ID does not exist! Please try again.",
+              404
+            )
+          );
+        }
+      }
+    });
+  } else {
+    return next(createCustomError("Password reset error", 404));
+  }
+});
+
 module.exports = {
   signup,
   login,
   forgotPassword,
+  resetPassword,
 };
