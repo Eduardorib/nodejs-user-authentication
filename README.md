@@ -9,7 +9,7 @@ A simple node.js user authentication, using:
 - Password Hashing (bcrypt) ✅
 - Route Protection (JWT) ✅
 - Role-Based Access Control ✅
-- Reset Password
+- Reset Password ✅
 - OAuth
 
 ## Project setup
