@@ -16,6 +16,10 @@ const UserModel = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      resetToken: {
+        type: DataTypes.STRING,
+        default: "",
+      },
     },
     { timestamps: true }
   );
